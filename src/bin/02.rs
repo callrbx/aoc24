@@ -1,14 +1,23 @@
-
-
 advent_of_code::solution!(2);
 
 fn is_safe(sequence: &[u32]) -> bool {
-    let is_ordered = sequence.windows(2).all(|pair| pair[0] < pair[1])
-        || sequence.windows(2).all(|pair| pair[0] > pair[1]);
-    let has_small_diffs = sequence
-        .windows(2)
-        .all(|pair| pair[0].abs_diff(pair[1]) <= 3);
-    is_ordered && has_small_diffs
+    let mut increasing = true;
+    let mut decreasing = true;
+
+    for window in sequence.windows(2) {
+        let diff = window[0].abs_diff(window[1]);
+        if diff > 3 {
+            return false;
+        }
+        if window[0] >= window[1] {
+            increasing = false;
+        }
+        if window[0] <= window[1] {
+            decreasing = false;
+        }
+    }
+
+    increasing || decreasing // strictly ordered
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
