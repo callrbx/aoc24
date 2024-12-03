@@ -7,14 +7,11 @@ pub fn part_one(input: &str) -> Option<u32> {
     // use named capture groups X and Y
     let re = Regex::new(r"mul\((?P<X>\d{1,3}),(?P<Y>\d{1,3})\)").unwrap();
 
-    let sum: u32 = re
-        .captures_iter(input)
-        .map(|cap| {
-            let x = cap["X"].parse::<u32>().unwrap_or(0);
-            let y = cap["Y"].parse::<u32>().unwrap_or(0);
-            x * y
-        })
-        .sum();
+    let sum: u32 = re.captures_iter(input).fold(0, |acc, cap| {
+        let x = cap["X"].parse::<u32>().unwrap_or(0);
+        let y = cap["Y"].parse::<u32>().unwrap_or(0);
+        acc + (x * y)
+    });
 
     Some(sum)
 }
@@ -26,24 +23,23 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut do_mul = true;
     let mut total_sum: u32 = 0;
 
-    // sort by start position
     let combined_matches = re_op
         .find_iter(input)
         .chain(re_mul.find_iter(input))
         .sorted_by_key(|m| m.start());
 
     for m in combined_matches {
-        let match_str = m.as_str();
-
-        if match_str == "do()" {
-            do_mul = true;
-        } else if match_str == "don't()" {
-            do_mul = false;
-        } else if let Some(caps) = re_mul.captures(match_str) {
-            if do_mul {
-                let x: u32 = caps["X"].parse().unwrap_or(0);
-                let y: u32 = caps["Y"].parse().unwrap_or(0);
-                total_sum += x * y;
+        match m.as_str() {
+            "do()" => do_mul = true,
+            "don't()" => do_mul = false,
+            _ => {
+                if let Some(caps) = re_mul.captures(m.as_str()) {
+                    if do_mul {
+                        let x = caps["X"].parse::<u32>().unwrap_or(0);
+                        let y = caps["Y"].parse::<u32>().unwrap_or(0);
+                        total_sum += x * y;
+                    }
+                }
             }
         }
     }
