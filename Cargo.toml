@@ -23,6 +23,7 @@ test_lib = []
 regex = "*"
 itertools = "*"
 ndarray = "*"
+rayon = "*"
 
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }
