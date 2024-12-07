@@ -19,10 +19,7 @@ impl Equation {
                 return None;
             }
         };
-        let ops: Vec<usize> = remaining
-            .split(" ")
-            .map(|op| op.parse().unwrap())
-            .collect();
+        let ops: Vec<usize> = remaining.split(" ").map(|op| op.parse().unwrap()).collect();
         Some(Self {
             test_value: ans,
             ops,
@@ -80,10 +77,7 @@ impl Equation {
 
 pub fn part_one(input: &str) -> Option<usize> {
     // process lines in to equations
-    let equs: Vec<Equation> = input
-        .lines()
-        .filter_map(Equation::new)
-        .collect();
+    let equs: Vec<Equation> = input.lines().filter_map(Equation::new).collect();
 
     // parallel iterate to check if valid
     Some(equs.par_iter().map(|equ| equ.is_valid(false)).sum())
@@ -91,10 +85,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 
 pub fn part_two(input: &str) -> Option<usize> {
     // process lines in to equations
-    let equs: Vec<Equation> = input
-        .lines()
-        .filter_map(Equation::new)
-        .collect();
+    let equs: Vec<Equation> = input.lines().filter_map(Equation::new).collect();
 
     // parallel iterate to check if valid
     Some(equs.par_iter().map(|equ| equ.is_valid(true)).sum())
