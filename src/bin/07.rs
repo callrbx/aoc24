@@ -1,12 +1,27 @@
 advent_of_code::solution!(7);
 
-use itertools::Itertools;
 use rayon::prelude::*;
+
+type Operator = fn(usize, usize) -> usize;
+
+fn operator_add(a: usize, b: usize) -> usize {
+    a + b
+}
+
+fn operator_concatenate(a: usize, b: usize) -> usize {
+    let digits: usize = (b as f64).log10().floor() as usize + 1;
+    a * 10usize.pow(digits as u32) + b
+}
+
+fn operator_multiply(a: usize, b: usize) -> usize {
+    a * b
+}
 
 #[derive(Debug)]
 struct Equation {
     test_value: usize,
     ops: Vec<usize>,
+    solutions: usize,
 }
 
 impl Equation {
@@ -21,57 +36,47 @@ impl Equation {
         };
         let ops: Vec<usize> = remaining.split(" ").map(|op| op.parse().unwrap()).collect();
         Some(Self {
+            solutions: 0,
             test_value: ans,
             ops,
         })
     }
 
-    // return our answer if valid, otherwise 0
-    fn is_valid(&self, part2: bool) -> usize {
-        let n = self.ops.len();
-        if n < 2 {
-            return 0; // cant eval 2 numbers
-        }
-
-        // generate all possible combinations of ops with +, *, | (concat, keeping it single char)
-        let op_combos = if part2 {
-            (0..n - 1)
-                .map(|_| vec!['+', '*', '|'])
-                .multi_cartesian_product()
+    fn is_valid(&mut self, part2: bool) -> usize {
+        let operators: Vec<Operator> = if part2 {
+            vec![operator_add, operator_multiply, operator_concatenate]
         } else {
-            (0..n - 1).map(|_| vec!['+', '*']).multi_cartesian_product()
+            vec![operator_add, operator_multiply]
         };
 
-        for ops in op_combos {
-            if self.eval(&ops) == self.test_value {
-                return self.test_value;
-            }
-        }
+        self.solve(&operators, self.ops[0], 1);
 
-        0
+        if self.solutions > 0 {
+            self.test_value
+        } else {
+            0
+        }
     }
 
-    // do math on statement with the ops vector
-    fn eval(&self, ops: &[char]) -> usize {
-        let mut result = self.ops[0];
-        for (i, &op) in ops.iter().enumerate() {
-            match op {
-                '+' => result += self.ops[i + 1],
-                '*' => result *= self.ops[i + 1],
-                '|' => {
-                    let concat = format!("{}{}", result, self.ops[i + 1])
-                        .parse::<usize>()
-                        .unwrap();
-                    result = concat;
-                }
-                _ => panic!("bad op"),
-            }
-            // early exit
-            if result > self.test_value {
-                return 0;
-            }
+    fn solve(&mut self, operators: &[Operator], current_result: usize, index: usize) {
+        if current_result > self.test_value {
+            return;
         }
-        result
+
+        if index == self.ops.len() {
+            if current_result == self.test_value {
+                self.solutions += 1;
+            }
+            return;
+        }
+
+        operators.iter().for_each(|&operator| {
+            self.solve(
+                operators,
+                operator(current_result, self.ops[index]),
+                index + 1,
+            );
+        });
     }
 }
 
@@ -80,7 +85,11 @@ pub fn part_one(input: &str) -> Option<usize> {
     let equs: Vec<Equation> = input.lines().filter_map(Equation::new).collect();
 
     // parallel iterate to check if valid
-    Some(equs.par_iter().map(|equ| equ.is_valid(false)).sum())
+    Some(
+        equs.into_par_iter()
+            .fold(|| 0_usize, |acc, mut equ| equ.is_valid(false) + acc)
+            .sum::<usize>(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
@@ -88,7 +97,11 @@ pub fn part_two(input: &str) -> Option<usize> {
     let equs: Vec<Equation> = input.lines().filter_map(Equation::new).collect();
 
     // parallel iterate to check if valid
-    Some(equs.par_iter().map(|equ| equ.is_valid(true)).sum())
+    Some(
+        equs.into_par_iter()
+            .fold(|| 0_usize, |acc, mut equ| equ.is_valid(true) + acc)
+            .sum::<usize>(),
+    )
 }
 
 #[cfg(test)]

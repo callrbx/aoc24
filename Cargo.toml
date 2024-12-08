@@ -24,6 +24,7 @@ regex = "*"
 itertools = "*"
 ndarray = "*"
 rayon = "*"
+lazy_static ="*"
 
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }
