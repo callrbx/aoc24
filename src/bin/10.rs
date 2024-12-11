@@ -22,7 +22,6 @@ pub fn part_one(input: &str) -> Option<usize> {
         .map(|((r, c), &v)| {
             if v == 0 {
                 bfs_reach((r, c), get_neighbors)
-                    .into_iter()
                     .filter(|&(x, y)| grid.get((x, y)) == Some(&9))
                     .count()
             } else {
