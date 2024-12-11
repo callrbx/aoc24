@@ -4,11 +4,11 @@ advent_of_code::solution!(11);
 
 #[cached]
 fn compute_stone(stone: usize, depth: usize) -> usize {
-    let num_digits = (stone as f64).log10().floor() as usize + 1;
-
     if depth == 0 {
         return 1;
     }
+
+    let num_digits = (stone as f64).log10().floor() as usize + 1;
 
     if stone == 0 {
         compute_stone(1, depth - 1)
