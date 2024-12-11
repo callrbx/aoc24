@@ -26,6 +26,7 @@ ndarray = "*"
 rayon = "*"
 lazy_static ="*"
 pathfinding = "*"
+cached = "*"
 
 # Template dependencies
 chrono = { version = "0.4.38", optional = true }
